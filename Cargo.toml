@@ -1,0 +1,24 @@
+[package]
+name = "kryolite_smart_contract"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <you@example.com>"]
+description = "A sample project with wasm-pack"
+license = "MIT/Apache-2.0"
+repository = "https://github.com/yourgithubusername/hello-wasm"
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+wasm-bindgen = "0.2"
+serde = { version = "1.0.152", default-features = false, features = ["derive"] }
+kryolite-macro = { path = "kryolite-macro" }
+rmp-serde = "1.1.1"
+rmpv = "1.0.0"
+lazy_static = "1.4.0"
+wee_alloc = "0.4.5"
+
+[profile.release]
+lto = true
+opt-level = 's'

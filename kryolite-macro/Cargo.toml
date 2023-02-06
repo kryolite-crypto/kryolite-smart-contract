@@ -1,0 +1,18 @@
+[package]
+name = "kryolite-macro"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <you@example.com>"]
+description = "A sample project with wasm-pack"
+license = "MIT/Apache-2.0"
+repository = "https://github.com/yourgithubusername/hello-wasm"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "1.0", features = ["visit-mut", "full"] }
+quote = "1.0"
+proc-macro2 = "1.0.50"
+serde = { version = "1.0.152", default-features = false, features = ["derive"] }
+serde_json = "1.0"
