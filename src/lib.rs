@@ -1,18 +1,22 @@
 mod address;
 mod contract;
 mod transaction;
+mod krc721;
+mod u256;
 
 extern crate wee_alloc;
+extern crate bigint;
 
-use std::{alloc::{GlobalAlloc, Layout}, any::type_name, mem::size_of};
+use std::{alloc::{GlobalAlloc, Layout}, mem::size_of, any::type_name};
 
+pub use u256::*;
 pub use address::*;
 pub use contract::*;
 pub use transaction::*;
 pub use kryolite_macro::*;
-
-pub use rmp_serde::{Serializer, Deserializer};
-pub use serde::{Serialize, Deserialize};
+pub use krc721::*;
+pub use serde_json;
+pub use serde_json::*;
 
 pub fn require(condition: bool) {
   if !condition {
@@ -27,6 +31,13 @@ pub fn rand() -> f32 {
   unsafe {
     return __rand();
   }
+}
+
+pub fn sha256(message: &[u8]) -> U256 {
+  let digest = hashes::sha2::sha256::hash(message);
+  let ptr = digest.into_bytes().as_ptr() as *const [u64; 4];
+
+  unsafe { U256(bigint::U256(*ptr)) }
 }
 
 pub trait Numeric {}
@@ -78,6 +89,8 @@ impl PointerTrait for Address {
   }
 }
 
+// TODO: U256
+
 impl<T: Numeric> PointerTrait for T {
   fn size(&self) -> usize {
     size_of::<T>()
@@ -116,6 +129,16 @@ pub fn publish_event() {
   }
 }
 
+pub fn push_return(val: &str) {
+  unsafe {
+    __return(val.as_ptr(), val.len());
+  }
+}
+
+// Use `wee_alloc` as the global allocator.
+#[global_allocator]
+static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
 extern "C" {
   pub fn __exit(exitCode: i32);
   pub fn __rand() -> f32;
@@ -124,20 +147,13 @@ extern "C" {
   pub fn __println(typ: *const u8, type_len: usize, val: *const u8, val_len: usize);
   pub fn __append_event(typ: *const u8, type_len: usize, val: *const u8, val_len: usize);
   pub fn __publish_event();
+  pub fn __return(str: *const u8, val_len: usize);
 }
-
-pub trait State {
-  fn _export_state(&self);
-}
-
-// Use `wee_alloc` as the global allocator.
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[no_mangle]
 pub unsafe fn __malloc(len: usize) -> *mut u8  {
   let layout = Layout::from_size_align(len, 1);
-  ALLOC.alloc_zeroed(layout.unwrap()) as *mut u8
+  ALLOC.alloc(layout.unwrap()) as *mut u8
 }
 
 #[no_mangle]

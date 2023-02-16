@@ -1,11 +1,11 @@
 use super::__transfer;
-use serde::Serialize;
+use serde::{Serialize, Deserialize, de::Visitor};
 
 pub static NULL_ADDRESS: Address = Address([0; 26]);
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq)]
-pub struct Address([u8; 26]);
+#[derive(Copy, Clone, Hash, Eq, PartialEq)]
+pub struct Address(pub [u8; 26]);
 
 #[allow(dead_code)]
 impl Address {
@@ -15,11 +15,19 @@ impl Address {
     }
   }
 
-  pub fn as_str(&self) -> &str {
-    std::str::from_utf8(&self.0).unwrap()
+  pub fn as_bytes(&self) -> &[u8] {
+    &self.0
   }
 
-  pub fn len(&self) -> usize {
+  pub fn as_string(&self) -> String {
+    let addr = bs58::encode(self.0)
+      .with_alphabet(bs58::Alphabet::FLICKR)
+      .into_string();
+
+    "kryo:".to_owned() + &addr
+  }
+
+  pub const fn len(&self) -> usize {
     self.0.len()
   }
 
@@ -28,15 +36,21 @@ impl Address {
   }
 }
 
+impl AsRef<[u8]> for Address {
+  fn as_ref(&self) -> &[u8] {
+    unsafe { std::slice::from_raw_parts(self.as_ptr(), self.len()) }
+  }
+}
+
 impl Serialize for Address {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer {
-          serializer.serialize_str(self.as_str())
+          serializer.serialize_str(self.as_string().as_str())
     }
 }
 
-/*impl <'de> Deserialize<'de> for Address {
+impl <'de> Deserialize<'de> for Address {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de> {
@@ -57,8 +71,13 @@ impl<'de> Visitor<'de> for StringVisitor {
     where
         E: serde::de::Error,
     {
-        let arr: [char; 26] = v.as_bytes().try_into().unwrap();
-        Ok(Address(arr))
+      let addr = bs58::decode(v.replace("kryo:", ""))
+        .with_alphabet(bs58::Alphabet::FLICKR)
+        .into_vec()
+        .unwrap();
+
+      let bytes: [u8; 26] = addr.try_into().unwrap();
+
+      Ok(Address(bytes))
     }
 }
-*/

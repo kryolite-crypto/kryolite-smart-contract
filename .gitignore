@@ -2,3 +2,4 @@
 /Cargo.lock
 samples/kryolite-lottery/target
 samples/kryolite-lottery/Cargo.lock
+samples/kryolite-lottery/src/lib.rs

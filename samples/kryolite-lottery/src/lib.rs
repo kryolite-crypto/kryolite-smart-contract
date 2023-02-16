@@ -3,7 +3,6 @@ extern crate kryolite_smart_contract;
 use kryolite_smart_contract::*;
 use std::{mem::take};
 
-#[smart_contract_state]
 pub struct KryoliteLottery {
     pub ticket_price: u64,
     pub registration_open: bool,
@@ -13,8 +12,7 @@ pub struct KryoliteLottery {
 #[smart_contract]
 impl KryoliteLottery {
 
-  #[exported]
-  pub unsafe fn new() -> KryoliteLottery {
+  pub fn new() -> KryoliteLottery {
     KryoliteLottery {
         ticket_price: 100kryo,
         registration_open: true,
@@ -22,7 +20,6 @@ impl KryoliteLottery {
     }
   }
 
-  #[exported]
   pub fn buy_ticket(&mut self) {
     require(TRANSACTION.value == self.ticket_price);
     require(self.registration_open);
@@ -36,7 +33,6 @@ impl KryoliteLottery {
     event!(TicketSold, &TRANSACTION.from, &self.registrants.len());
   }
 
-  #[exported]
   pub fn draw_winner(&mut self) {
     require(TRANSACTION.from == CONTRACT.owner);
     require(!self.registration_open);
@@ -50,12 +46,10 @@ impl KryoliteLottery {
     let winner: Address = registrants[random];
 
     winner.transfer(prize_pool);
-    self.registration_open = true;
 
     event!(AnnounceWinner, &winner, &prize_pool);
   }
 
-  #[exported]
   pub fn open_registration(&mut self) {
     require(TRANSACTION.from == CONTRACT.owner);
     self.registration_open = true;
@@ -63,7 +57,6 @@ impl KryoliteLottery {
     event!(RegistrationsOpen);
   }
 
-  #[exported]
   pub fn close_registration(&mut self) {
     require(TRANSACTION.from == CONTRACT.owner);
     self.registration_open = false;
@@ -71,7 +64,6 @@ impl KryoliteLottery {
     event!(RegistrationsClosed);
   }
 
-  #[exported]
   pub fn set_ticket_price(&mut self, new_price: u64) {
     require(TRANSACTION.from == CONTRACT.owner);
     require(!self.registration_open);
@@ -80,8 +72,12 @@ impl KryoliteLottery {
     self.ticket_price = new_price;
   }
 
-  #[exported]
-  pub fn testfn(&mut self, addr: &Address) {
+  pub fn testfn(&mut self, addr: &Address) -> Address {
     event!(TestEvent, &"foo", addr);
+    *addr
+  }
+
+  pub fn tickets_sold(&self) -> usize {
+    self.registrants.len()
   }
 }
