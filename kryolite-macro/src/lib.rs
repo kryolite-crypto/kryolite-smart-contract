@@ -79,9 +79,6 @@ impl VisitMut for Walker {
       CONTRACT.name = name.clone();
     }
 
-    visit_mut::visit_item_impl_mut(self, i);
-    i.items.append(&mut self.items);
-
     let init: TokenStream = format!("
       pub fn __init() -> *mut u8 {{
         let instance = {}::new();
@@ -95,6 +92,7 @@ impl VisitMut for Walker {
     };
 
     i.items.push(syn::ImplItem::Method(initfn));
+    visit_mut::visit_item_impl_mut(self, i);
   }
 
   fn visit_impl_item_method_mut(&mut self, i: &mut ImplItemMethod) {
@@ -103,7 +101,7 @@ impl VisitMut for Walker {
       Visibility::Public(_x) => {
         let name = i.sig.ident.to_string();
 
-        if name == "new" {
+        if name == "new" || name == "__init" {
           visit_mut::visit_impl_item_method_mut(self, i);
           return;
         }

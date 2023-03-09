@@ -1,7 +1,7 @@
 extern crate kryolite_smart_contract;
 
 use kryolite_smart_contract::*;
-use std::{mem::take};
+use std::mem::take;
 
 pub struct KryoliteLottery {
     pub ticket_price: u64,

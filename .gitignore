@@ -2,4 +2,5 @@
 /Cargo.lock
 samples/kryolite-lottery/target
 samples/kryolite-lottery/Cargo.lock
-samples/kryolite-lottery/src/lib.rs
+samples/crypto-beer/target
+samples/crypto-beer/Cargo.lock
