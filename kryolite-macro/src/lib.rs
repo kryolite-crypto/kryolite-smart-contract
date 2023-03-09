@@ -79,6 +79,10 @@ impl VisitMut for Walker {
       CONTRACT.name = name.clone();
     }
 
+    let export: TokenStream = format!("#[export_name = \"__init\"]")
+    .parse()
+    .unwrap();
+
     let init: TokenStream = format!("
       pub fn __init() -> *mut u8 {{
         let instance = {}::new();
@@ -88,6 +92,7 @@ impl VisitMut for Walker {
       .unwrap();
 
     let initfn: ImplItemMethod = parse_quote!{
+      #export
       #init
     };
 
