@@ -143,7 +143,6 @@ extern "C" {
   pub fn __exit(exitCode: i32);
   pub fn __rand() -> f32;
   pub fn __transfer(addr_ptr: *const Address, value: u64);
-  pub fn __export_state(str: *const u8, len: usize);
   pub fn __println(typ: *const u8, type_len: usize, val: *const u8, val_len: usize);
   pub fn __append_event(typ: *const u8, type_len: usize, val: *const u8, val_len: usize);
   pub fn __publish_event();

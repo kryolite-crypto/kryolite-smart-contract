@@ -25,8 +25,7 @@ impl KryoliteLottery {
     require(self.registration_open);
 
     let fee: u64 = TRANSACTION.value / 100;
-    CONTRACT.owner.transfer(fee);
-    CONTRACT.address.transfer(TRANSACTION.value - fee);
+    CONTRACT.owner.transfer(fee); // small fee for owner
 
     self.registrants.push(TRANSACTION.from);
 
@@ -72,12 +71,17 @@ impl KryoliteLottery {
     self.ticket_price = new_price;
   }
 
-  pub fn testfn(&mut self, addr: &Address) -> Address {
-    event!(TestEvent, &"foo", addr);
-    *addr
-  }
-
+  // non-mutable function, possible to call this without transaction
   pub fn tickets_sold(&self) -> usize {
     self.registrants.len()
+  }
+
+  // non-mutable function, possible to call this without transaction
+  pub fn get_state(&self) -> KryoliteLottery {
+    KryoliteLottery {
+      ticket_price: self.ticket_price,
+      registration_open: self.registration_open,
+      registrants: self.registrants.clone()
+    }
   }
 }

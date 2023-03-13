@@ -2,6 +2,7 @@ use std::ops;
 
 use serde::{Serialize, Deserialize, de::Visitor};
 
+#[derive(Copy, Clone, Hash, Eq, PartialEq)]
 pub struct U256(pub bigint::U256);
 
 impl U256 {
