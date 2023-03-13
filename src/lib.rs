@@ -15,8 +15,8 @@ pub use contract::*;
 pub use transaction::*;
 pub use kryolite_macro::*;
 pub use krc721::*;
+pub use serde::*;
 pub use serde_json;
-pub use serde_json::*;
 
 pub fn require(condition: bool) {
   if !condition {

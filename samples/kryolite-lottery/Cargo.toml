@@ -12,6 +12,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 kryolite_smart_contract = { path = "../../" }
+serde = { version = "1.0.152", default-features = false, features = ["derive"] }
 
 [profile.release]
 lto = true

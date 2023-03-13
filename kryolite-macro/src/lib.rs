@@ -34,7 +34,7 @@ pub fn smart_contract(
     write_json(&json);
 
     // uncomment to see outputs
-    //eprintln!("{}", input.to_token_stream().to_string());
+    // eprintln!("{}", input.to_token_stream().to_string());
 
     input.to_token_stream().into()
 }
@@ -97,6 +97,12 @@ impl VisitMut for Walker {
     };
 
     i.items.push(syn::ImplItem::Method(initfn));
+    visit_mut::visit_item_impl_mut(self, i);
+
+    for ele in &self.items {
+      i.items.push(ele.clone());
+    }
+
     visit_mut::visit_item_impl_mut(self, i);
   }
 
@@ -177,7 +183,7 @@ impl VisitMut for Walker {
               #export
               #wrapper
             );
-
+        
             self.items.push(syn::ImplItem::Method(wrapfn));
 
             *i = parse_quote! {

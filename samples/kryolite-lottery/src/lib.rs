@@ -3,6 +3,7 @@ extern crate kryolite_smart_contract;
 use kryolite_smart_contract::*;
 use std::mem::take;
 
+#[derive(Serialize)]
 pub struct KryoliteLottery {
     pub ticket_price: u64,
     pub registration_open: bool,
