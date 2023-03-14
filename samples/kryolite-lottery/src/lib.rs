@@ -5,9 +5,16 @@ use std::mem::take;
 
 #[derive(Serialize)]
 pub struct KryoliteLottery {
-    pub ticket_price: u64,
-    pub registration_open: bool,
-    pub registrants: Vec<Address>
+  pub ticket_price: u64,
+  pub registration_open: bool,
+  pub registrants: Vec<Address>,
+  pub last_winner: Winner
+}
+
+#[derive(Serialize, Clone)]
+pub struct Winner {
+  pub address: Address,
+  pub reward: u64
 }
 
 #[smart_contract]
@@ -15,9 +22,13 @@ impl KryoliteLottery {
 
   pub fn new() -> KryoliteLottery {
     KryoliteLottery {
-        ticket_price: 100kryo,
-        registration_open: true,
-        registrants: Vec::new()
+      ticket_price: 100kryo,
+      registration_open: true,
+      registrants: Vec::new(),
+      last_winner: Winner {
+        address: NULL_ADDRESS,
+        reward: 0
+      }
     }
   }
 
@@ -46,6 +57,11 @@ impl KryoliteLottery {
     let winner: Address = registrants[random];
 
     winner.transfer(prize_pool);
+
+    self.last_winner = Winner {
+      address: winner,
+      reward: prize_pool
+    };
 
     event!(AnnounceWinner, &winner, &prize_pool);
   }
@@ -78,11 +94,17 @@ impl KryoliteLottery {
   }
 
   // non-mutable function, possible to call this without transaction
+  pub fn get_last_winner(&self) -> Winner {
+    self.last_winner.clone()
+  }
+
+  // non-mutable function, possible to call this without transaction
   pub fn get_state(&self) -> KryoliteLottery {
     KryoliteLottery {
       ticket_price: self.ticket_price,
       registration_open: self.registration_open,
-      registrants: self.registrants.clone()
+      registrants: self.registrants.clone(),
+      last_winner: self.last_winner.clone()
     }
   }
 }
