@@ -2,11 +2,12 @@ use std::ops;
 
 use serde::{Serialize, Deserialize, de::Visitor};
 
+#[repr(C)]
 #[derive(Copy, Clone, Hash, Eq, PartialEq)]
 pub struct U256(pub bigint::U256);
 
 impl U256 {
-    fn as_string(&self) -> String {
+    pub fn as_string(&self) -> String {
         let bytes: [u8; 32] = unsafe { std::mem::transmute(self.0) };
         bs58::encode(bytes)
             .with_alphabet(bs58::Alphabet::FLICKR)
