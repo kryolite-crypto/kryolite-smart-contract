@@ -53,9 +53,9 @@ impl KRC721Event {
         }
     }
 
-    pub fn consume(token_id: &U256) {
+    pub fn consume(owner: &Address, token_id: &U256) {
         unsafe {
-            __consume_token(token_id as *const U256);
+            __consume_token(owner as *const Address, token_id as *const U256);
         }
     }
 

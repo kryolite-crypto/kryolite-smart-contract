@@ -145,7 +145,7 @@ extern "C" {
   pub fn __rand() -> f32;
   pub fn __transfer(addr_ptr: *const Address, value: u64);
   pub fn __transfer_token(from: *const Address, to: *const Address, token_id: *const U256);
-  pub fn __consume_token(token_id: *const U256);
+  pub fn __consume_token(owner: *const Address, token_id: *const U256);
   pub fn __approval(from: *const Address, to: *const Address, token_id: *const U256);
   pub fn __println(typ: *const u8, type_len: usize, val: *const u8, val_len: usize);
   pub fn __append_event(typ: *const u8, type_len: usize, val: *const u8, val_len: usize);
@@ -184,4 +184,15 @@ macro_rules! event {
 
 pub fn type_of<T>(_: T) -> &'static str {
   type_name::<T>()
+}
+
+#[derive(Serialize, Clone, PartialEq, Eq, Hash)]
+pub struct StandardToken {
+    pub name: String,
+    pub description: String
+}
+
+pub trait KryoliteStandardToken {
+    fn get_token(&self, token_id: U256) -> StandardToken;
+    fn get_token_json(&self, token_id: U256);
 }

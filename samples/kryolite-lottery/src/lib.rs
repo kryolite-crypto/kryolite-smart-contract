@@ -69,31 +69,29 @@ impl KryoliteLottery {
     require(!self.registration_open);
     require(self.tickets.len() > 0);
 
-    let mut owners = self.ticket_to_address.drain();
-    
     let prize_pool = CONTRACT.balance;
-    let count = owners.len() as f32;
+    let count = self.ticket_to_address.len() as f32;
     let random = (rand() * count) as usize;
 
-    let (_, winner) = owners.nth(random).unwrap();
+    let winner = self.ticket_to_address.values().nth(random).unwrap();
 
-    for (token_id, _) in owners {
-      KRC721Event::consume(&token_id);
+    for (token_id, owner) in &self.ticket_to_address {
+      KRC721Event::consume(&owner, &token_id);
     }
 
     winner.transfer(prize_pool);
 
     self.last_winner = Winner {
-      address: winner,
+      address: *winner,
       reward: prize_pool
     };
+
+    event!(AnnounceWinner, winner, &prize_pool);
 
     self.tickets.clear();
     self.ticket_to_address.clear();
     self.address_to_tickets.clear();
     self.approved_transfers.clear();
-
-    event!(AnnounceWinner, &winner, &prize_pool);
   }
 
  pub fn open_registration(&mut self) {
@@ -221,5 +219,17 @@ impl KRC721Metadata for KryoliteLottery {
 
   fn token_uri(&self, token_id: U256) -> String {
     format!("http://example.com/token/{}", token_id.as_string())
+  }
+}
+
+#[interface]
+impl KryoliteStandardToken for KryoliteLottery {
+  fn get_token(&self, token_id: U256) -> StandardToken {
+    let ticket = self.tickets.get(&token_id).unwrap();
+    
+    StandardToken {
+      name: ticket.name.clone(),
+      description: "Winner Winner Chicken Dinner".to_string()
+    }
   }
 }
