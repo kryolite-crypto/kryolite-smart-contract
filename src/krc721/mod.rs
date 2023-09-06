@@ -1,4 +1,4 @@
-use crate::{Address, U256, __transfer_token, __consume_token, push_return, __approval};
+use crate::{Address, U256, __transfer_token, __consume_token, __approval};
 
 pub trait KRC165 {
     fn supports_interface(interface_id: i32) -> bool;

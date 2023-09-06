@@ -1,17 +1,24 @@
 use std::ops;
-
+use super::B32;
+use num_bigint::BigUint;
 use serde::{Serialize, Deserialize, de::Visitor};
+use lazy_static::lazy_static;
+
+fn u256_max_value() -> &'static BigUint {
+    return &U256_MAX_VALUE;
+}
+
+lazy_static! {
+    pub static ref U256_MAX_VALUE: BigUint = BigUint::from_bytes_be(&[255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]);
+}
 
 #[repr(C)]
 #[derive(Copy, Clone, Hash, Eq, PartialEq)]
-pub struct U256(pub bigint::U256);
+pub struct U256(pub [u8; 32]);
 
 impl U256 {
     pub fn as_string(&self) -> String {
-        let bytes: [u8; 32] = unsafe { std::mem::transmute(self.0) };
-        bs58::encode(bytes)
-            .with_alphabet(bs58::Alphabet::FLICKR)
-            .into_string()
+        B32.encode(&self.0)
     }
 }
 
@@ -19,7 +26,13 @@ impl ops::Add<U256> for U256 {
     type Output = U256;
 
     fn add(self, rhs: U256) -> U256 {
-        U256(self.0 + rhs.0)
+        let a = BigUint::from_bytes_be(&self.0);
+        let b = BigUint::from_bytes_be(&rhs.0);
+        
+        let mut bytes = ((a + b) % u256_max_value()).to_bytes_be();
+        bytes.truncate(32);
+
+        U256(bytes.try_into().unwrap())
     }
 }
 
@@ -27,7 +40,13 @@ impl ops::Sub<U256> for U256 {
     type Output = U256;
 
     fn sub(self, rhs: U256) -> Self::Output {
-        U256(self.0 - rhs.0)
+        let a = BigUint::from_bytes_be(&self.0);
+        let b = BigUint::from_bytes_be(&rhs.0);
+
+        let mut bytes = ((a - b) % u256_max_value()).to_bytes_be();
+        bytes.truncate(32);
+
+        U256(bytes.try_into().unwrap())
     }
 }
 
@@ -35,7 +54,13 @@ impl ops::Mul<U256> for U256 {
     type Output = U256;
 
     fn mul(self, rhs: U256) -> Self::Output {
-        U256(self.0 * rhs.0)
+        let a = BigUint::from_bytes_be(&self.0);
+        let b = BigUint::from_bytes_be(&rhs.0);
+
+        let mut bytes = ((a * b) % u256_max_value()).to_bytes_be();
+        bytes.truncate(32);
+
+        U256(bytes.try_into().unwrap())
     }
 }
 
@@ -43,7 +68,10 @@ impl ops::Div<U256> for U256 {
     type Output = U256;
 
     fn div(self, rhs: U256) -> Self::Output {
-        U256(self.0 / rhs.0)
+        let a = BigUint::from_bytes_be(&self.0);
+        let b = BigUint::from_bytes_be(&rhs.0);
+
+        U256((a / b).to_bytes_be().try_into().unwrap())
     }
 }
 
@@ -51,7 +79,10 @@ impl ops::Rem<U256> for U256 {
     type Output = U256;
 
     fn rem(self, rhs: U256) -> Self::Output {
-        U256(self.0 % rhs.0)
+        let a = BigUint::from_bytes_be(&self.0);
+        let b = BigUint::from_bytes_be(&rhs.0);
+
+        U256((a % b).to_bytes_be().try_into().unwrap())
     }
 }
 
@@ -86,13 +117,7 @@ impl<'de> Visitor<'de> for StringVisitor {
     where
         E: serde::de::Error,
     {
-      let addr = bs58::decode(v)
-        .with_alphabet(bs58::Alphabet::FLICKR)
-        .into_vec()
-        .unwrap();
-
-      let bytes: [u8; 32] = addr.try_into().unwrap();
-
-      Ok(U256(bytes.into()))
+      let bytes = B32.decode(v.as_bytes()).unwrap();
+      Ok(U256(bytes.try_into().unwrap()))
     }
 }

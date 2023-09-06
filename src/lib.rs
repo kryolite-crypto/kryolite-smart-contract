@@ -5,11 +5,11 @@ mod krc721;
 mod u256;
 
 extern crate wee_alloc;
-extern crate bigint;
+extern crate num_bigint;
 
 use std::{alloc::{GlobalAlloc, Layout}, mem::size_of, any::type_name};
 
-pub use bs58;
+use num_bigint::BigUint;
 pub use u256::*;
 pub use address::*;
 pub use contract::*;
@@ -18,6 +18,13 @@ pub use kryolite_macro::*;
 pub use krc721::*;
 pub use serde::*;
 pub use serde_json;
+
+use data_encoding::Encoding;
+use data_encoding_macro::new_encoding;
+
+pub const B32: Encoding = new_encoding!{
+    symbols: "abcdefghijkmnpqrstuvwxyz23456789",
+};
 
 pub fn require(condition: bool) {
   if !condition {
@@ -36,9 +43,7 @@ pub fn rand() -> f32 {
 
 pub fn sha256(message: &[u8]) -> U256 {
   let digest = hashes::sha2::sha256::hash(message);
-  let ptr = digest.into_bytes().as_ptr() as *const [u64; 4];
-
-  unsafe { U256(bigint::U256(*ptr)) }
+  U256(digest.into_bytes())
 }
 
 pub trait Numeric {}

@@ -15,7 +15,7 @@ pub struct KryoliteLottery {
   pub last_winner: Winner
 }
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Copy, Clone)]
 pub struct Winner {
   pub address: Address,
   pub reward: u64
@@ -57,7 +57,7 @@ impl KryoliteLottery {
 
     self.ticket_to_address.insert(ticket.token_id, TRANSACTION.from);
     self.tickets.insert(ticket.token_id, ticket.clone());
-    
+
     let tickets = self.address_to_tickets.entry(TRANSACTION.from).or_insert(HashSet::new());
     tickets.insert(ticket.clone());
 
@@ -184,7 +184,7 @@ impl KRC721 for KryoliteLottery {
     *self.approved_transfers.get(&token_id).unwrap()
   }
 
-  fn transfer_from(&mut self, from: Address, to: Address, token_id: U256, data: Vec<u8>) {
+  fn transfer_from(&mut self, from: Address, to: Address, token_id: U256, _data: Vec<u8>) {
     require(from != NULL_ADDRESS && to != NULL_ADDRESS);
     require(self.tickets.contains_key(&token_id));
     require(from != to);

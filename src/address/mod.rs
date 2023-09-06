@@ -1,4 +1,4 @@
-use super::__transfer;
+use super::{__transfer, B32};
 use serde::{Serialize, Deserialize, de::Visitor};
 
 pub static NULL_ADDRESS: Address = Address([0; 26]);
@@ -20,9 +20,7 @@ impl Address {
   }
 
   pub fn as_string(&self) -> String {
-    let addr = bs58::encode(self.0)
-      .with_alphabet(bs58::Alphabet::FLICKR)
-      .into_string();
+    let addr = B32.encode(&self.0);
 
     "kryo:".to_owned() + &addr
   }
@@ -71,11 +69,7 @@ impl<'de> Visitor<'de> for StringVisitor {
     where
         E: serde::de::Error,
     {
-      let addr = bs58::decode(v.replace("kryo:", ""))
-        .with_alphabet(bs58::Alphabet::FLICKR)
-        .into_vec()
-        .unwrap();
-
+      let addr = B32.decode(v.replace("kryo:", "").as_bytes()).unwrap();
       let bytes: [u8; 26] = addr.try_into().unwrap();
 
       Ok(Address(bytes))
