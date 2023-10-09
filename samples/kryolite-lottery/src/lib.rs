@@ -92,6 +92,7 @@ impl KryoliteLottery {
     self.ticket_to_address.clear();
     self.address_to_tickets.clear();
     self.approved_transfers.clear();
+    self.tickets_sold = 0;
   }
 
  pub fn open_registration(&mut self) {
@@ -116,17 +117,14 @@ impl KryoliteLottery {
     self.ticket_price = new_price;
   }
 
-  // non-mutable function, possible to call this without transaction
   pub fn tickets_sold(&self) -> usize {
     self.tickets.len()
   }
 
-  // non-mutable function, possible to call this without transaction
   pub fn get_last_winner(&self) -> Winner {
     self.last_winner.clone()
   }
 
-  // non-mutable function, possible to call this without transaction
   pub fn get_state(&self) -> KryoliteLottery {
     self.clone()
   }
@@ -210,7 +208,7 @@ impl KRC721 for KryoliteLottery {
 #[interface]
 impl KRC721Metadata for KryoliteLottery {
   fn name(&self) -> String {
-    "Kryolite Lottery".to_string()
+    "Saturday Night Lotto".to_string()
   }
 
   fn symbol(&self) -> String {

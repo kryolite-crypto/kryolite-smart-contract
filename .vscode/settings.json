@@ -1,0 +1,5 @@
+{
+    "rust-analyzer.linkedProjects": [
+        "./samples/kryolite-lottery/Cargo.toml"
+    ]
+}

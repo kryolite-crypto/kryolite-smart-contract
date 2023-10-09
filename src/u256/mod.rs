@@ -110,7 +110,7 @@ impl<'de> Visitor<'de> for StringVisitor {
     type Value = U256;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(formatter, "a string represents Address")
+        write!(formatter, "a string represents U256")
     }
 
     fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
