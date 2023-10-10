@@ -66,7 +66,6 @@ impl KryoliteLottery {
 
   pub fn draw_winner(&mut self) {
     require(TRANSACTION.from == CONTRACT.owner);
-    require(!self.registration_open);
     require(self.tickets.len() > 0);
 
     let prize_pool = CONTRACT.balance;
@@ -92,7 +91,6 @@ impl KryoliteLottery {
     self.ticket_to_address.clear();
     self.address_to_tickets.clear();
     self.approved_transfers.clear();
-    self.tickets_sold = 0;
   }
 
  pub fn open_registration(&mut self) {
@@ -132,7 +130,7 @@ impl KryoliteLottery {
   fn print_ticket(&mut self) -> Ticket {
     self.tickets_sold += 1;
 
-    let name = "Kryolite Lottery Ticket #".to_string() + &self.tickets_sold.to_string();
+    let name = "Saturday Night Lotto Ticket #".to_string() + &self.tickets_sold.to_string();
     let token_id = sha256(name.as_bytes()) + sha256(TRANSACTION.from.as_bytes());
 
     Ticket {
